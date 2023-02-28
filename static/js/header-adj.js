@@ -1,0 +1,1 @@
+document.querySelector('#header-background').style.height = '100px'

@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}
+<title>Miez Beauty lounge</title>
+{% endblock %}
+{% block background %}
+<h1 class="center-text">
+    <small  class="white">MieZ Beauty Lounge</small>
+  </h1>
+<a href="{{ url_for('home') }}">
+    <img class="header-img" src="/static/img/header.png" alt="">
+</a>
+ 
+{% endblock %}
+        
+
+{% block body %}
+    <main>
+   <!-- BODY SECTION-->
+   <section id="sections" class="container">
+    <!--  WELCOME MESSAGE -->
+    <div class="container-fluid">
+
+        <div id="section1" class="row">
+            <div class="col section1-text">
+                
+                <h1>Welcome</h1>
+                <p>
+                    We are here to help you look and feel your best.
+                    Our experienced team specializes in providing
+                    <span>
+                        luxurious spa and beauty
+                    </span> 
+                     services to help you look and feel your best.
+                </p>
+                <a href="#">
+                    <button id="contact-us" class="btn">contact us</button>
+                </a>
+               
+            </div>
+            <div class="col section-img">
+                <img class="section1-img" src="/static/img/welcome.svg" alt="">
+            </div>
+        </div>
+    </div>
+    
+
+    <hr>
+    <div id="section2">
+        <h1 class="whatWeDo">What We Do</h1>
+        <div class="row sec2-row1">
+            <div class="col-6">
+                
+                <img class="section2-img" src="/static/img/dummy-haircut.jfif" alt="">
+                <h3>Hair Cut & Styling</h3>
+                <div class="caption">
+                    Enjoy a full body massage designed to leave you always feeling relaxed and rejuvenated.
+                </div>
+
+            </div>
+            <div class="col-6">
+                <img class="section2-img" src="/static/img/facials.jpg" alt="facials-imgs">
+                <h3>Facials</h3>
+                <div class="caption">
+                    Our luxurious facial services will leave your skin feeling refreshed, hydrated, and glowing..
+                </div>
+
+            </div>
+        </div>
+
+        
+        <div class="row sec2-row2">
+            <div class="col-6">
+                <img class="sec2-img2" src="/static/img/salon.jfif" alt="">
+                <h3>Salon & Spa</h3>
+                
+                <div class="caption">
+                    We provide a relaxing and luxurious experience for all of your beauty and spa needs.
+                </div>
+
+            </div>
+            <div class="col-6">
+                <img class="sec2-img2" src="/static/img/tatoo.jpg" alt="">
+                <h3>Tatooing</h3>
+                <div class="caption">
+                    Our experience and talented artists will help you achieve the perfect tattoo.
+                </div>
+
+            </div>
+        </div>
+        <hr>
+    </div>
+   
+   
+</div>
+
+    <div id="section3" class="container-flex">
+        <div class="row">
+            <div class="col-6">
+              <img src="/static/img/section3-img1.svg" alt="">  
+            </div>
+            <div class="col-6">
+                <h1>SPA and Salon</h1>
+                <p>
+                    At Meiz Beauty and Spa, you can find a variety
+                    of spa and salon services, including haircuts, 
+                    color, styling, manicures and pedicures, waxing
+                    and more
+                </p>
+              </div>
+
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <h1>Massage & Relaxation</h1>
+                <p>
+                    Massage services are also available at Meiz Beauty and Spa, including Swedish, deep tissue, and hot stone massages.
+                </p>
+                
+              </div>
+              <div class="col-6">
+                <img src="/static/img/section3-img2.svg" alt="">  
+              </div>
+              
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+              <img src="/static/img/section3-img3.svg" alt="">  
+            </div>
+            <div class="col-6">
+                <h1>Facials & Cosmetics</h1>
+                <p>
+                    Facial services are also available at Meiz
+                    Beauty and Spa, including Swedish, 
+                    deep tissue, and hot stone massages.
+                </p>
+              </div>
+              
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <h1>Tattooing</h1>
+                <p>
+                   
+                    Meiz Tattoo Service provides you with a
+                    unique and creative way to express 
+                    yourself. Our experienced and talented
+                    artists will help you create a one-of-a-kind
+                    tattoo that you will love!
+                </p>
+            </div>
+               
+              <div class="col-6">
+                <img src="/static/img/section3-img4.svg" alt="">  
+              </div>
+              <div class="row">
+                <h2>
+                    No matter what your beauty needs are, Meiz Beauty
+                    Lounge always has something for everyone.
+                  </p>
+                </h2>
+
+              <div class="row">
+                <div class="col-6">
+                    <img src="/static/img/section3-img5.svg" alt="">
+                </div>
+                <div class="col-6">
+                    <p>
+                        No matter what your beauty needs are,
+                        Meiz Beauty lounge has something for
+                        everyone.From spa and salon services to
+                        facials and tattooing, to massage and 
+                        more, you can find all the services you
+                        need to look and feel your best
+                    </p>
+                </div>
+              </div>                  
+    </div>
+    
+        
+       
+    
+    
+</section>
+<div id="beforefoot" class="container-fluid">
+    <form action="" method="post"></form>
+    <div class="mb-3">
+        
+        <div class="form-header-text">
+            <i><img src="/static/img/icons/coffee.svg" alt=""></i>
+            <h1>Book an appointment</h1>
+        </div>
+    
+        <label for="exampleFormControlInput1" class="form-label">Name</label>
+        <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="John Doe">
+    </div>
+
+    <div class="mb-3">
+        <label for="exampleFormControlInput1" class="form-label">Phone</label>
+        <input type="tel" class="form-control" id="exampleFormControlInput1" placeholder="+2348030000000">
+    </div>
+
+    <div class="mb-3">
+        <label for="exampleFormControlTextarea1" class="form-label">Message</label>
+        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+      </div>
+      <button type="submit"></button>
+    </form>
+</div>
+
+  
+    </main>
+
+{% endblock %}

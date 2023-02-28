@@ -1,0 +1,78 @@
+<!-- <nav id="nav" class="navbar navbar-expand-sm">
+
+    <div  class="container-fluid"> -->
+      <!-- Logo -->
+  
+          <!-- <img id="logo" src="/static/img/logo.svg" alt="Miez Logo"> -->
+      
+        
+      <!-- Links -->
+  
+      <!-- <ul id="nav-links" class="navbar-nav">
+          <li  class="nav-item">
+              <a class="nav-link" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="#">Services</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="#">About us</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('membership') }}">Membership</a>
+          </li>
+          <li class="nav-item">
+                  <a class="nav-link" href="#">Contact us</a>
+              </li>
+      </ul>
+   -->
+              <!-- BUTTONS FOR LOGIN -->
+  
+      <!-- <ul id="nav-btns" class="navbar-nav">
+          <li class="nav-item">
+              <a class="nav-link" href="#">
+                  <button type="button" class="btn btn-light login-btn">Login</button>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="#">
+                  <button type="button" class="btn btn-light login-btn">Join us</button>
+              </a>
+          </li>
+      </ul>
+      </div>
+  
+  </nav>   -->
+
+
+
+
+  <nav class="nav">
+  <img id="logo" src="/static/img/logo.svg" alt="Miez Logo">
+    <div class="menu-ac"><i class="fa fa-bars fa-lg"></i> Menu</div>
+    <div class="ac">
+        <ul class="sol-menu">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">About-us</a></li>
+            <li><a href="{{ url_for('membership') }}">Membership</a></li>
+            <li><a href="#">Contact us</a></li>
+            <li>
+                <a  href="{{ url_for('login') }}">
+                    <button type="button" class="btn btn-light login-btn">Login</button>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('signUp') }}">
+                    <button type="button" class="btn btn-light login-btn">Join us</button>
+                </a>
+            </li>
+        </ul>
+        <!-- <ul class="sag-menu">
+        <form action="" method="GET">
+            <input type="text" class="search" name="s" /><i class="fa fa-search fa-lg"></i>
+        </form>
+        </ul> -->
+        </div>
+    </nav>
+    <script src="/static/js/test.js"></script>
