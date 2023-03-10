@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="static/assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="static/assets/img/favicon.png">
   <title>
-    Material Dashboard 2 by Creative Tim
+    Miez Membership
   </title>
   <!--     Fonts and icons     -->
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900|Roboto+Slab:400,700" />
@@ -32,6 +32,7 @@
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
   <!-- Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link rel="shortcut icon" href="/static/img/icons/favicon.ico" type="image/x-icon">
   <!-- CSS Files -->
   <link id="pagestyle" href="static/assets/css/material-dashboard.css?v=3.0.4" rel="stylesheet" />
 </head>
@@ -92,6 +93,7 @@
           </div>
         </nav> -->
         <!-- End Navbar -->
+     
       </div>
     </div>
   </div>
@@ -107,23 +109,44 @@
             <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column ms-auto me-auto ms-lg-auto me-lg-5">
               <div class="card card-plain">
                 <div class="card-header">
-                  <h4 class="font-weight-bolder">Sign Up</h4>
-                  <p class="mb-0">Enter your email and password to register</p>
+                  <h4 class="font-weight-bolder">Join Miez Beauty Lounge</h4>
+                  <p class="mb-0">Experience Beauty</p>
                 </div>
                 <div class="card-body">
-                  <form role="form">
+                  <form role="form" action="{{ url_for('register') }}", method="post">
+                    {{ form.hidden_tag() }}
                     <div class="input-group input-group-outline mb-3">
-                      <label class="form-label">Name</label>
-                      <input type="text" class="form-control">
+                      <!-- <label class="form-label">Name</label> -->
+                      {{ form.fname.label(class='form-label') }}
+                      {{ form.fname(class='form-control') }}
+                      <!-- <input type="text" class="form-control"> -->
+                    </div>
+
+                    <div class="input-group input-group-outline mb-3">
+                       {{ form.lname.label(class='form-label') }}
+                      {{ form.lname(class='form-control') }}
                     </div>
                     <div class="input-group input-group-outline mb-3">
-                      <label class="form-label">Email</label>
-                      <input type="email" class="form-control">
+                      {{ form.username.label(class='form-label') }}
+                      {{ form.username(class='form-control') }}
                     </div>
                     <div class="input-group input-group-outline mb-3">
-                      <label class="form-label">Password</label>
-                      <input type="password" class="form-control">
+                      {{ form.email.label(class='form-label') }}
+                      {{ form.email(class='form-control') }}
                     </div>
+                    
+                    <div class="input-group input-group-outline mb-3">
+                      {{ form.password.label(class='form-label') }}
+                      {{ form.password(class='form-control') }}
+                    </div>
+                    <div class="input-group input-group-outline mb-3">
+                      {{ form.confirm_password.label(class='form-label') }}
+                      {{ form.confirm_password(class='form-control') }}
+                    </div>
+                  </div>
+                 
+                </div>
+              
                     <div class="form-check form-check-info text-start ps-0">
                       <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked>
                       <label class="form-check-label" for="flexCheckDefault">
@@ -131,14 +154,16 @@
                       </label>
                     </div>
                     <div class="text-center">
-                      <button type="button" class="btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0">Sign Up</button>
+                      {{ form.submit(class='btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0') }}
+                      
+                      <!-- <button type="button" class="btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0">Sign Up</button> -->
                     </div>
                   </form>
                 </div>
                 <div class="card-footer text-center pt-0 px-lg-2 px-1">
                   <p class="mb-2 text-sm mx-auto">
                     Already have an account?
-                    <a href="../pages/sign-in.html" class="text-primary text-gradient font-weight-bold">Sign in</a>
+                    <a href="{{ url_for('login') }}" class="text-primary text-gradient font-weight-bold">Sign in</a>
                   </p>
                 </div>
               </div>

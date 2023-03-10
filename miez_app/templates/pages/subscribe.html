@@ -1,0 +1,120 @@
+{% extends 'pages/base.html' %}
+
+{% block otherStyle %}
+<link rel="stylesheet" href="/static/css/membership.css">
+<script defer src="/static/js/header-adj.js"></script>
+{% endblock %}
+
+{% block body %}
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+    <!-- Navbar -->
+      {% include 'pages/nav.html' %}
+    <!-- End Navbar -->
+    <div class="container-fluid py-4">
+      
+        <section class="wrapper">
+            <div class="content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-3">
+                            <div id="classic" class="card">
+                              
+                              <div id="card-head">
+                                <h1>Classic</h1>
+                                <p> Break your limitations
+                                  Set the Pace</p>
+                                  <h1>₦
+                                    30,000</h1>
+                              </div>
+                              
+                                <div class="card-content">
+                                    <!-- <h4 class="card-title">
+                                        <a href="http://www.fostrap.com/2016/03/bootstrap-3-carousel-fade-effect.html"> Bootstrap 3 Carousel FadeIn Out Effect
+                                      </a>
+                                    </h4> -->
+                                    <p class="">
+                                        Tutorial to make a carousel bootstrap by adding more wonderful effect fadein ...
+                                    </p>
+                                </div>
+                                <div class="card-read-more">
+                                  <a href="">
+                                    <button id="plan-btn">Join us</button>
+                                </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-3">
+                            <div id="silver" class="card">
+                              <div id="card-head">
+                                <h1>Silver</h1>
+                                <p> Have a go  and test your  superpowers</p>
+                                  <h1>₦
+                                    50,000</h1>
+                              </div>
+                                <div class="card-content">
+                                    
+                                    <p class="pblack">
+                                        Material Design is a visual programming language made by Google. Language programming...
+                                    </p>
+                                </div>
+                                <div class="card-read-more">
+                                  <a href="">
+                                    <button id="plan-btn">Join us</button>
+                                </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-3">
+                            <div id="gold" class="card">
+                              <div id="card-head">
+                                <h1>Gold</h1>
+                                <p class="" > Have a go  and test your  superpowers</p>
+                                  <h1>₦
+                                    75,000</h1>
+                              </div>
+                                <div class="card-content">
+                                    
+                                    <p class="pblack">
+                                        tutorials button hover animation, although very much a hover button is very beauti...
+                                    </p>
+                                </div>
+                                <div class="card-read-more">
+                                  <a href="">
+                                    <button id="plan-btn">Join us</button>
+                                </a>
+                                </div>
+                            </div>
+                           
+                        </div>
+                        <div class="col-xs-12 col-sm-3">
+                          <div id="platinum" class="card">
+                            <div id="card-head">
+                              <h1>Platinum</h1>
+                              <p> Experiment the power of infinite possibilities</p>
+                                <h1>₦
+                                  100,000</h1>
+                            </div>
+                              <div class="card-content">
+                                  
+                                  <p class="pblack">
+                                      Material Design is a visual programming language made by Google. Language programming...
+                                  </p>
+                              </div>
+                              <div class="card-read-more">
+                                 <a href="">
+                                      <button id="plan-btn">Join us</button>
+                                  </a>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </section>
+      
+      {% include 'footer.html' %}
+     
+    </div>
+  </main>
+ {% endblock %}
