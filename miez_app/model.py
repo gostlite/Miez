@@ -73,9 +73,10 @@ class User1(BaseModel):
     first_name: str = Field()
     last_name : str = Field()
     email : str = Field(unique=True)
+    prof_pic : str = Field(default='default.png')
     username : str = Field(unique=True)
     password : str = Field()
-    admin: str = Field(default=False, nullable=True)
+    admin: bool = Field(default=False, nullable=True)
 
     def __repr__(self):
         return f'{self.username} has been created'

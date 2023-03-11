@@ -1,11 +1,13 @@
 from flask import render_template,redirect, url_for, flash, request
 from flask_login import login_user,login_required, current_user, logout_user, UserMixin
 from bson.objectid import ObjectId
-from miez_app.forms import RegisterForm, LoginForm
-from miez_app import app,bcrypt, client, login_manager, user_db
+from miez_app.forms import RegisterForm, LoginForm, UpdateAccountForm
+from miez_app import app,bcrypt,login_manager, user_db
 from miez_app.model import User, Subscription, Appointment, User1
 from datetime import datetime
 import json
+import os
+import secrets
 
 
 
@@ -23,6 +25,14 @@ class MyUser(UserMixin):
         return str(object_id)
 
 
+
+def save_pic(pic):
+    randomh = secrets.token_hex(8)
+    _, fext = os.path.splitext(pic)
+    fname = randomh + fext
+    file_path = os.path.join(app.root_path, 'static/profile_pic', fname)
+    pic.save(file_path)
+    return fname
 
 
 
@@ -56,8 +66,7 @@ def register():
         # new_user['password']=hashed_password
         
         myuser = User1(first_name=form.fname.data,last_name=form.lname.data,username=username, email= form.email.data, password=hashed_password )
-        myuser = json.dumps(myuser.__dict__)
-        user_db.insert_one(myuser)
+        user_db.insert_one(myuser.__dict__)
 
         flash('Successfully created account Created for you', 'success') 
         return redirect(url_for('login'))
@@ -71,8 +80,6 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = user_db.find_one({'username':form.username.data})
-        print(user)
-        print(type(user))
         if user and bcrypt.check_password_hash(user['password'], form.password.data):
             flash('Successfully logged in', 'success') 
             userlogin = MyUser(user)
@@ -97,19 +104,38 @@ def dashboard():
 @app.route('/profile')
 @login_required
 def profile():
-   return render_template('pages/profile.html') 
+    user = current_user.__dict__.get('user_json')
+    print(user.get('_id'))
+    form = UpdateAccountForm()
+    form.username.data = user.get('username')
+    form.email.data = user.get('email')
+    if form.validate_on_submit:
+        if form.img.data:
+            user['prof_pic'] = save_pic(form.img.data)
+        # user_db.find_one_and_replace({'_id':ObjectId(user.get('_id')),
+        #                              'email':form.email.data,
+        #                              'username':form.username.data})
+        user['username'] = form.username.data
+        user['email'] = form.email.data
+    print('-----this is the user')
+    myImg = url_for('static', filename='profile_pics/'+ user.get('prof_pic'))
+    # print(user.get('prof_pic'))
+    return render_template('pages/profile.html', img=myImg, form=form) 
 
 
 @app.route('/map')
+@login_required
 def map():
     return render_template('pages/map.html')
 
 @app.get('/appointments')
+@login_required
 def appointment():
     return render_template('pages/appointment.html')
 
 
 @app.get('/booking')
+@login_required
 def booking():
     return render_template('pages/bookingForm.html')
 
