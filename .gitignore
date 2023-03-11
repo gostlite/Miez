@@ -2,3 +2,4 @@
 menv
 .dist
 instance
+__pycache__
