@@ -1,14 +1,16 @@
 from flask import render_template,redirect, url_for, flash, request
 from flask_login import login_user,login_required, current_user, logout_user, UserMixin
 from bson.objectid import ObjectId
-from miez_app.forms import RegisterForm, LoginForm, UpdateAccountForm
-from miez_app import app,bcrypt,login_manager, user_db
-from miez_app.model import User, Subscription, Appointment, User1
+from miez_app.forms import RegisterForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, BookingForm
+from miez_app import app,bcrypt,login_manager, user_db, mail, jwt
+from flask_jwt_extended import create_access_token, get_jwt_identity
+from miez_app.model import User1
+# from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from datetime import datetime
-import json
 import os
 import secrets
-
+from PIL import Image
+from flask_mail import Message
 
 
 # db = client.get_database('miez')
@@ -23,16 +25,43 @@ class MyUser(UserMixin):
     def get_id(self):
         object_id = self.user_json.get('_id')
         return str(object_id)
+    
+    def get_reset_token(self, expires_sec=50):
+        # s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        # return s.dumps({'user_id': self.get_id()}).decode('utf-8')
+        token = create_access_token(identity=self.get_id(),expires_delta=int(datetime.strftime(datetime.now())) + expires_sec).encode('utf-8')
+        print(token)
+        return token
+
+    # @staticmethod
+    # def verify_reset_token(self,token):
+    #     s = Serializer(app.config['SECRET_KEY'])
+    #     try:
+    #         user_id = s.loads(token)['user_id']
+    #     except:
+    #         return None
+    #     user = user_db.find_one({'_id':ObjectId(user_id)})
+    #     return MyUser(user)
+
+    def __repr__(self):
+        return f"User('{self.user_json['username']}', '{self.user_json['email']}, '{self.user_json['prof_pic']}'')"
+    
 
 
 
-def save_pic(pic):
-    randomh = secrets.token_hex(8)
-    _, fext = os.path.splitext(pic)
-    fname = randomh + fext
-    file_path = os.path.join(app.root_path, 'static/profile_pic', fname)
-    pic.save(file_path)
-    return fname
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    return picture_fn
 
 
 
@@ -58,12 +87,7 @@ def register():
         #add logic to go back if uaername exist 
         
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        # new_user = User.copy()
-        # new_user['first_name']=form.fname.data
-        # new_user['last_name']=form.lname.data
-        # new_user['username']=username
-        # new_user['email']=form.email.data
-        # new_user['password']=hashed_password
+   
         
         myuser = User1(first_name=form.fname.data,last_name=form.lname.data,username=username, email= form.email.data, password=hashed_password )
         user_db.insert_one(myuser.__dict__)
@@ -98,25 +122,31 @@ def membership():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    print(current_user.user_json['prof_pic'])
+    # print(current_user.prof_pic)
     return render_template('pages/dashboard.html')
 
 
-@app.route('/profile')
+@app.route('/profile',methods=['GET', 'POST'])
 @login_required
 def profile():
-    user = current_user.__dict__.get('user_json')
-    print(user.get('_id'))
+    user = current_user.user_json
     form = UpdateAccountForm()
     form.username.data = user.get('username')
     form.email.data = user.get('email')
     if form.validate_on_submit:
+        # change/ update profile pic
         if form.img.data:
-            user['prof_pic'] = save_pic(form.img.data)
-        # user_db.find_one_and_replace({'_id':ObjectId(user.get('_id')),
-        #                              'email':form.email.data,
-        #                              'username':form.username.data})
-        user['username'] = form.username.data
-        user['email'] = form.email.data
+            user['prof_pic'] = save_picture(form.img.data)
+            user['username'] = form.username.data
+            user["email"] = form.email.data
+
+            user_db.find_one_and_update({'_id':ObjectId(user.get('_id'))},
+                                        {'$set': {'email':form.email.data,
+                                        'username':form.username.data,"prof_pic":user["prof_pic"]}})
+            flash("succefully updated your profile", 'success')
+            return redirect(url_for('dashboard'))
+     
     print('-----this is the user')
     myImg = url_for('static', filename='profile_pics/'+ user.get('prof_pic'))
     # print(user.get('prof_pic'))
@@ -134,12 +164,67 @@ def appointment():
     return render_template('pages/appointment.html')
 
 
-@app.get('/booking')
+@app.route('/booking',methods=['GET', 'POST'])
 @login_required
 def booking():
-    return render_template('pages/bookingForm.html')
+    form = BookingForm()
+    if form.validate_on_submit:
+        print(form.data)
+        pass
+    return render_template('pages/bookingForm.html', form = form)
+
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = user_db.find_one({'email':form.email.data})
+        if not user:
+            return redirect(url_for('register'))
+        cur_user = MyUser(user)
+        send_email(cur_user)
+        flash('An email has been sent to reset your password', 'info')
+        return redirect(url_for('login'))
+    return render_template('request_reset.html', form=form)
+
+
+@app.route('/subscribe')
+@login_required
+def subscribe():
+    return render_template('pages/subscribe.html')
+
+@app.route('/reset_password/<token>')
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    user = MyUser.get_reset_token(token)
+    if user is None:
+        flash('Sorry you have entered an invalid or expired token')
+        return redirect(url_for('reset_request'))
+    
+    form = ResetPasswordForm()
+    # return render_template('')
+ 
+
+@app.route('/payment')
+@login_required
+def payment():
+    return render_template('pages/billing.html')
 
 @app.get('/logout')
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+
+def send_email(user):
+    token = user.get_reset_token()
+    msg = Message('Password reset Email', recipients=['mrjohn.soft@gmail.com'],sender='support@myhbsconline.com',body= f'''Kindly click on this link
+        {url_for('reset_token', token=token)}
+        to reset your password''')
+
+    print(mail.send(msg))
+
+

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TimeField, DateField, FieldList,SelectField, FormField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 from flask_login import current_user
 
@@ -56,3 +56,30 @@ class UpdateAccountForm(FlaskForm):
             user = user_db.find_one({'email':email.data})
             if user:
                 raise ValidationError('Email already exists, please use another')
+            
+
+class RequestResetForm(FlaskForm):
+        email = StringField('Email',
+                        validators=[DataRequired(), Email()])
+        submit = SubmitField('Request Password Reset')
+
+        def validate_email(self, email):
+            user = user_db.find_one({'email':email.data})
+            if user is None:
+                raise ValidationError('There is no account with that email. You must register first.')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password',
+                                     validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')
+
+
+class BookingForm(FlaskForm):
+    time = TimeField('Time')
+    date = DateField('Date')
+    services= SelectField(label='services', choices=["nailbar", "haircut/hairsaloon", "facials", "tatooing"], validators=[DataRequired()])
+    address = StringField('Address', validators=[DataRequired("Please put in an address")])
+    details = TextAreaField('Anything else')
+    submit = SubmitField('Submit')

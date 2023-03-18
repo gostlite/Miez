@@ -77,6 +77,7 @@ class User1(BaseModel):
     username : str = Field(unique=True)
     password : str = Field()
     admin: bool = Field(default=False, nullable=True)
+    num_of_visit: int = Field(default=0, nullable=True)
 
     def __repr__(self):
         return f'{self.username} has been created'
