@@ -18,7 +18,7 @@ app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = dotenv_values('.env').get('USERNAME')
 app.config['MAIL_PASSWORD'] = dotenv_values('.env').get('PASSWORD')
 app.config["JWT_SECRET_KEY"] = dotenv_values('.env').get('JWT_SECRET_KEY')
-jwt = JWTManager(app)
+# jwt = JWTManager(app)
 
 mail = Mail(app)
 bcrypt = Bcrypt(app)

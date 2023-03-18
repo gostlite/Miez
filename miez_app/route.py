@@ -2,17 +2,20 @@ from flask import render_template,redirect, url_for, flash, request
 from flask_login import login_user,login_required, current_user, logout_user, UserMixin
 from bson.objectid import ObjectId
 from miez_app.forms import RegisterForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, BookingForm
-from miez_app import app,bcrypt,login_manager, user_db, mail, jwt
-from flask_jwt_extended import create_access_token, get_jwt_identity
+from miez_app import app,bcrypt,login_manager, user_db, mail
+from flask_jwt_extended import create_access_token, get_jwt_identity,verify_jwt_in_request
 from miez_app.model import User1
 # from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from jwt import encode, decode, exceptions
 import os
 import secrets
 from PIL import Image
 from flask_mail import Message
 
 
+# class TokenException(exceptions.ExpiredSignatureError, BaseException):
+#     pass
 # db = client.get_database('miez')
 # subscribe = client.get_database('subscribe')
 
@@ -29,19 +32,28 @@ class MyUser(UserMixin):
     def get_reset_token(self, expires_sec=50):
         # s = Serializer(app.config['SECRET_KEY'], expires_sec)
         # return s.dumps({'user_id': self.get_id()}).decode('utf-8')
-        token = create_access_token(identity=self.get_id(),expires_delta=int(datetime.strftime(datetime.now())) + expires_sec).encode('utf-8')
+        # token = create_access_token(identity=self.get_id())
+        # new_token = token.encode('utf-8')
+        now = datetime.now(timezone.utc)
+        token = encode({'user_id':str(self.get_id()), 'exp':datetime.timestamp(now + timedelta(minutes=30))},app.config["SECRET_KEY"],"HS256")
         print(token)
+        print(f"decoded token: {decode(token,app.config['SECRET_KEY'],'HS256')}")
         return token
 
-    # @staticmethod
-    # def verify_reset_token(self,token):
-    #     s = Serializer(app.config['SECRET_KEY'])
-    #     try:
-    #         user_id = s.loads(token)['user_id']
-    #     except:
-    #         return None
-    #     user = user_db.find_one({'_id':ObjectId(user_id)})
-    #     return MyUser(user)
+    @staticmethod
+    def verify_reset_token(token):
+        now = datetime.timestamp(datetime.now(timezone.utc))
+        decoded = decode(token,app.config['SECRET_KEY'],'HS256')
+        print(decoded)
+        try:
+            user_id = decoded['user_id']
+            if now > decoded['exp']:
+                return None
+        except BaseException:
+            return None
+        # user = user_db.find_one({'_id':ObjectId(user_id)})
+        # return MyUser(user)
+        return user_id
 
     def __repr__(self):
         return f"User('{self.user_json['username']}', '{self.user_json['email']}, '{self.user_json['prof_pic']}'')"
@@ -182,6 +194,7 @@ def reset_request():
     if form.validate_on_submit():
         user = user_db.find_one({'email':form.email.data})
         if not user:
+            flash("User was not found, kindly register")
             return redirect(url_for('register'))
         cur_user = MyUser(user)
         send_email(cur_user)
@@ -195,17 +208,26 @@ def reset_request():
 def subscribe():
     return render_template('pages/subscribe.html')
 
-@app.route('/reset_password/<token>')
+@app.route('/reset_password/<token>',methods=["Get", "POST"])
 def reset_token(token):
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    user = MyUser.get_reset_token(token)
-    if user is None:
+    try:
+        user_id = MyUser.verify_reset_token(token)
+    except (exceptions.ExpiredSignatureError, BaseException):
+        user_id = None
+
+    if user_id is None:
         flash('Sorry you have entered an invalid or expired token')
         return redirect(url_for('reset_request'))
-    
     form = ResetPasswordForm()
-    # return render_template('')
+    if form.validate_on_submit():
+        new_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+        user_db.find_one_and_update({'_id':ObjectId(str(user_id))},{'$set':{
+            "password":new_password
+        }})
+        return redirect(url_for('login'))
+    return render_template('request_token.html', form=form)
  
 
 @app.route('/payment')
@@ -215,6 +237,7 @@ def payment():
 
 @app.get('/logout')
 def logout():
+    # add a profile visit increment here
     logout_user()
     return redirect(url_for('home'))
 
@@ -222,9 +245,9 @@ def logout():
 def send_email(user):
     token = user.get_reset_token()
     msg = Message('Password reset Email', recipients=['mrjohn.soft@gmail.com'],sender='support@myhbsconline.com',body= f'''Kindly click on this link
-        {url_for('reset_token', token=token)}
+        {url_for('reset_token', token=token, _external=True)}
         to reset your password''')
 
-    print(mail.send(msg))
+    mail.send(msg)
 
 
