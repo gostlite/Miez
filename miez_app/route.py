@@ -124,7 +124,12 @@ def membership():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('pages/dashboard.html')
+    user = current_user.user_json
+    try:
+        mylist = list(user_bk.find({"user_id":user["_id"]}))
+    except BaseException:
+        pass
+    return render_template('pages/dashboard.html', bookings=mylist)
 
 
 @app.route('/profile',methods=['GET', 'POST'])
@@ -169,10 +174,10 @@ def appointment():
     # "accepted":True
     user = current_user.user_json
     try:
-        mylist = user_bk.find({"user_id":user["_id"]})
+        mylist = list(user_bk.find({"user_id":user["_id"]}))
     except BaseException:
         pass
-    return render_template('pages/appointment.html', aList=mylist)
+    return render_template('pages/appointment.html', bookings=mylist)
 
 
 @app.get('/notifications')
@@ -192,18 +197,21 @@ def booking():
     user = current_user.user_json
     form = BookingForm()
     # checking the free user
-    if user['subscribe'] != "Free" :
+    print(user['membership'])
+    print(user['trials'])
+    if user['membership'] != "Free" :
         if form.validate_on_submit():    
             bookingsValid(form, user)
             return redirect(url_for('dashboard'))
         return render_template('pages/bookingForm.html', form = form)
-    elif user['subscribe']  == 'Free' and int(user['trials']) > 0:
+    elif user['membership']  == 'Free' and user['trials'] > 0:
         if form.validate_on_submit():    
             bookingsValid(form, user)
-            trials = int(user['trials'])-1
+            trials = user['trials']-1
             user['trials'] = trials
             user_db.find_one_and_update({"_id":ObjectId(user['id'])}, {'$set':{"trials":trials}})
             return redirect(url_for('dashboard'))
+        return render_template('pages/bookingForm.html', form = form)
     flash("Sorry your free trials is exausted, kindly select a plan to enjoy our services", 'danger')
     return redirect(url_for('payment'))
 
@@ -275,8 +283,9 @@ def send_email(user):
 
 def bookingsValid(form, user):
     
-    new_booking =Booking(time= form.time.data,
-                        date=form.date.data,
+    new_booking =Booking(time= str(form.time.data),
+                         user_id= user['_id'],
+                        date=str(form.date.data),
                         services=form.services.data,
                         address=form.address.data,details=form.details.data)
     user_bk.insert_one(new_booking)
@@ -285,4 +294,5 @@ def bookingsValid(form, user):
     #increase bookings
     user["booking"] = int(user["booking"]) + 1
     user_db.find_one_and_update({"_id":user["_id"]}, {"$set":{"booking":user["booking"]}})
+    return
             
