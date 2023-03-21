@@ -25,6 +25,7 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 client = PyMongo(app)
 user_db = client.db.users
+user_bk = client.db.bookings
 from miez_app import route
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'

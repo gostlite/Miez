@@ -40,11 +40,16 @@ class User1(BaseModel):
 now = datetime.now(timezone.utc)
 class Member(BaseModel):
     plan: str = Field()
-    time_paid : int = Field(datetime.timestamp(now + timedelta(minutes=30)))
-    exp : int = Field()
+    time_paid : int = Field(now)
+    exp : int = Field(datetime.timestamp(now + timedelta(days=30)))
+
+
+class Booking(BaseModel):  
+    time: str = Field()
+    date : str = Field()
+    services: str = Field()
+    address : str = Field()
+    details : str = Field()
+    accepted : bool = Field(default=False)
+
     
-#     id = db.Column(db.Integer, primary_key=True)
-#     person_id = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
-#     subcribe = db.Column(db.Boolean, default=False, nullable=True)
-#     plan = db.Column(db.String(250), nullable=False)
-#     date_started = db.Column(db.String(250), nullable=False)

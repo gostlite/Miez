@@ -2,9 +2,9 @@ from flask import render_template,redirect, url_for, flash, request
 from flask_login import login_user,login_required, current_user, logout_user, UserMixin
 from bson.objectid import ObjectId
 from miez_app.forms import RegisterForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, BookingForm
-from miez_app import app,bcrypt,login_manager, user_db, mail
+from miez_app import app,bcrypt,login_manager, user_db, mail, user_bk
 from flask_jwt_extended import create_access_token, get_jwt_identity,verify_jwt_in_request
-from miez_app.model import User1
+from miez_app.model import User1,  Booking
 # from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from datetime import datetime, timedelta, timezone
 from jwt import encode, decode, exceptions
@@ -14,10 +14,6 @@ from PIL import Image
 from flask_mail import Message
 
 
-# class TokenException(exceptions.ExpiredSignatureError, BaseException):
-#     pass
-# db = client.get_database('miez')
-# subscribe = client.get_database('subscribe')
 
 """Giving a Usermixin structure to the mongodb str data to work with login manager"""
 class MyUser(UserMixin):
@@ -29,13 +25,9 @@ class MyUser(UserMixin):
         object_id = self.user_json.get('_id')
         return str(object_id)
     
-    def get_reset_token(self, expires_sec=50):
-        # s = Serializer(app.config['SECRET_KEY'], expires_sec)
-        # return s.dumps({'user_id': self.get_id()}).decode('utf-8')
-        # token = create_access_token(identity=self.get_id())
-        # new_token = token.encode('utf-8')
+    def get_reset_token(self, expires_min=10):
         now = datetime.now(timezone.utc)
-        token = encode({'user_id':str(self.get_id()), 'exp':datetime.timestamp(now + timedelta(minutes=30))},app.config["SECRET_KEY"],"HS256")
+        token = encode({'user_id':str(self.get_id()), 'exp':datetime.timestamp(now + timedelta(minutes=expires_min))},app.config["SECRET_KEY"],"HS256")
         print(token)
         print(f"decoded token: {decode(token,app.config['SECRET_KEY'],'HS256')}")
         return token
@@ -51,8 +43,6 @@ class MyUser(UserMixin):
                 return None
         except BaseException:
             return None
-        # user = user_db.find_one({'_id':ObjectId(user_id)})
-        # return MyUser(user)
         return user_id
 
     def __repr__(self):
@@ -121,6 +111,8 @@ def login():
             userlogin = MyUser(user)
             login_user(user=userlogin, remember=form.remember.data)
             next_page = request.args.get('next')
+            current_user.user_json["prof_visit"] = int( current_user.user_json["prof_visit"]) + 1
+            user_db.find_one_and_update({"_id":user["_id"]}, {"$set":{"prof_visit": current_user.user_json["prof_visit"]}})
             return redirect(url_for(next_page)) if next_page else redirect(url_for('dashboard'))
         else:
             return redirect(url_for('login'))
@@ -134,8 +126,6 @@ def membership():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    print(current_user.user_json['prof_pic'])
-    # print(current_user.prof_pic)
     return render_template('pages/dashboard.html')
 
 
@@ -172,17 +162,33 @@ def map():
 
 @app.get('/appointments')
 @login_required
-def appointment():
-    return render_template('pages/appointment.html')
+async def appointment():
+    user = current_user.user_json
+    try:
+        mylist = await user_bk.find({"_id":ObjectId(user["_id"]), "accepted":True })
+    except BaseException:
+        pass
+    return render_template('pages/appointment.html', aList=mylist)
 
 
 @app.route('/booking',methods=['GET', 'POST'])
 @login_required
 def booking():
+    user = current_user.user_json
     form = BookingForm()
-    if form.validate_on_submit:
-        print(form.data)
-        pass
+    if form.validate_on_submit():
+        new_booking =Booking(time= form.time.data,
+                              date=form.date.data,
+                              services=form.services.data,
+                              address=form.address.data,details=form.details.data)
+        user_bk.insert_one(new_booking)
+        flash(f"A new booking has been made for {form.date.data} by {form.time.data}, kindly keep checking your appointment page to see when it is approved")
+        #link the bookings to the user
+        #increase bookings
+        user["booking"] = int(user["booking"]) + 1
+        user_db.find_one_and_update({"_id":user["_id"]}, {"$set":{"booking":user["booking"]}})
+        return redirect(url_for('dashboard'))
+
     return render_template('pages/bookingForm.html', form = form)
 
 
