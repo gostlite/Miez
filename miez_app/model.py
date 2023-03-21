@@ -19,6 +19,7 @@ class User1(BaseModel):
     appointment : int = Field(default=0) 
     prof_visit : int = Field(default=0) 
     membership : str = Field(default="Free")
+    trials : int = Field(default=3)
     admin: bool = Field(default=False, nullable=True)
     num_of_visit: int = Field(default=0, nullable=True)
 

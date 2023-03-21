@@ -4,7 +4,6 @@ from bson.objectid import ObjectId
 from miez_app.forms import RegisterForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, BookingForm
 from miez_app import app,bcrypt,login_manager, user_db, mail, user_bk, user_not
 from miez_app.model import User1,  Booking
-# from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from datetime import datetime, timedelta, timezone
 from jwt import encode, decode, exceptions
 import os
@@ -192,20 +191,21 @@ def notification():
 def booking():
     user = current_user.user_json
     form = BookingForm()
-    if form.validate_on_submit():
-        new_booking =Booking(time= form.time.data,
-                              date=form.date.data,
-                              services=form.services.data,
-                              address=form.address.data,details=form.details.data)
-        user_bk.insert_one(new_booking)
-        flash(f"A new booking has been made for {form.date.data} by {form.time.data}, kindly keep checking your appointment page to see when it is approved")
-        #link the bookings to the user
-        #increase bookings
-        user["booking"] = int(user["booking"]) + 1
-        user_db.find_one_and_update({"_id":user["_id"]}, {"$set":{"booking":user["booking"]}})
-        return redirect(url_for('dashboard'))
-
-    return render_template('pages/bookingForm.html', form = form)
+    # checking the free user
+    if user['subscribe'] != "Free" :
+        if form.validate_on_submit():    
+            bookingsValid(form, user)
+            return redirect(url_for('dashboard'))
+        return render_template('pages/bookingForm.html', form = form)
+    elif user['subscribe']  == 'Free' and int(user['trials']) > 0:
+        if form.validate_on_submit():    
+            bookingsValid(form, user)
+            trials = int(user['trials'])-1
+            user['trials'] = trials
+            user_db.find_one_and_update({"_id":ObjectId(user['id'])}, {'$set':{"trials":trials}})
+            return redirect(url_for('dashboard'))
+    flash("Sorry your free trials is exausted, kindly select a plan to enjoy our services", 'danger')
+    return redirect(url_for('payment'))
 
 
 @app.route('/reset_password', methods=['GET', 'POST'])
@@ -273,3 +273,16 @@ def send_email(user):
     mail.send(msg)
 
 
+def bookingsValid(form, user):
+    
+    new_booking =Booking(time= form.time.data,
+                        date=form.date.data,
+                        services=form.services.data,
+                        address=form.address.data,details=form.details.data)
+    user_bk.insert_one(new_booking)
+    flash(f"A new booking has been made for {form.date.data} by {form.time.data}, kindly keep checking your appointment page to see when it is approved")
+    #link the bookings to the user
+    #increase bookings
+    user["booking"] = int(user["booking"]) + 1
+    user_db.find_one_and_update({"_id":user["_id"]}, {"$set":{"booking":user["booking"]}})
+            
