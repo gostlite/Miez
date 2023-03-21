@@ -2,8 +2,7 @@ from flask import render_template,redirect, url_for, flash, request
 from flask_login import login_user,login_required, current_user, logout_user, UserMixin
 from bson.objectid import ObjectId
 from miez_app.forms import RegisterForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, BookingForm
-from miez_app import app,bcrypt,login_manager, user_db, mail, user_bk
-from flask_jwt_extended import create_access_token, get_jwt_identity,verify_jwt_in_request
+from miez_app import app,bcrypt,login_manager, user_db, mail, user_bk, user_not
 from miez_app.model import User1,  Booking
 # from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from datetime import datetime, timedelta, timezone
@@ -151,8 +150,13 @@ def profile():
      
     print('-----this is the user')
     myImg = url_for('static', filename='profile_pics/'+ user.get('prof_pic'))
+    try:
+        approved_appointment_list = user_bk.find({"user_id":user['_id']}, {"approved":True})
+    except:
+        pass
+    
     # print(user.get('prof_pic'))
-    return render_template('pages/profile.html', img=myImg, form=form) 
+    return render_template('pages/profile.html', img=myImg, form=form, approved=approved_appointment_list) 
 
 
 @app.route('/map')
@@ -162,14 +166,26 @@ def map():
 
 @app.get('/appointments')
 @login_required
-async def appointment():
+def appointment():
+    # "accepted":True
     user = current_user.user_json
     try:
-        mylist = await user_bk.find({"_id":ObjectId(user["_id"]), "accepted":True })
+        mylist = user_bk.find({"user_id":user["_id"]})
     except BaseException:
         pass
     return render_template('pages/appointment.html', aList=mylist)
 
+
+@app.get('/notifications')
+@login_required
+def notification():
+    # "accepted":True
+    user = current_user.user_json
+    try:
+        mylist = user_not.find({"user_id":user["_id"]})
+    except BaseException:
+        pass
+    return render_template('pages/notifications.html', aList=mylist)
 
 @app.route('/booking',methods=['GET', 'POST'])
 @login_required

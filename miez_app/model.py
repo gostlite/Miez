@@ -45,6 +45,7 @@ class Member(BaseModel):
 
 
 class Booking(BaseModel):  
+    user_id :str= Field()
     time: str = Field()
     date : str = Field()
     services: str = Field()
@@ -52,4 +53,8 @@ class Booking(BaseModel):
     details : str = Field()
     accepted : bool = Field(default=False)
 
-    
+  
+class Notication(BaseModel):
+    user_id: str = Field()
+    title: str = Field()
+    message: str = Field()
