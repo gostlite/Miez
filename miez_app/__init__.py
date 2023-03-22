@@ -36,6 +36,6 @@ app.register_blueprint(users)
 app.register_blueprint(main)
 app.register_blueprint(post)
 # from miez_app import route
-login_manager.login_view = 'login'
+login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
 
