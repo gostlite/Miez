@@ -170,12 +170,19 @@
                   <tr>
                     <td>
                       <div class="d-flex px-2 py-1">
-                        <div>
-                          <img
-                            src="static/assets/img/small-logos/logo-spotify.svg"
-                            class="avatar avatar-sm me-3"
-                            alt="spotify"
-                          />
+                        <div class="avatar-group mt-2">
+                          <a
+                            href="javascript:;"
+                            class="avatar avatar-xs rounded-circle"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="{{ current_user.user_json.first_name }} {{ current_user.user_json.last_name }}"
+                          >
+                            <img
+                              src="static/profile_pics/{{ current_user.user_json.prof_pic }}"
+                              alt="user5"
+                            />
+                          </a>
                         </div>
                         <div class="d-flex flex-column justify-content-center">
                           <h6 class="mb-0 text-sm">{{ booking.date }}</h6>
@@ -183,20 +190,7 @@
                       </div>
                     </td>
                     <td>
-                      <div class="avatar-group mt-2">
-                        <a
-                          href="javascript:;"
-                          class="avatar avatar-xs rounded-circle"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="bottom"
-                          title="{{ current_user.user_json.first_name }} {{ current_user.user_json.last_name }}"
-                        >
-                          <img
-                            src="static/profile_pics/{{ current_user.user_json.prof_pic }}"
-                            alt="user5"
-                          />
-                        </a>
-                      </div>
+                      <div>{{ booking.time }}</div>
                     </td>
                     <td class="align-middle text-center text-sm">
                       <span class="text-xs font-weight-bold">

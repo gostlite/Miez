@@ -1,9 +1,11 @@
 # create user model class
-from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta, timezone
-from miez_app import client
+from miez_app import client, user_db
+from miez_app import login_manager,app
 from bson.objectid import ObjectId
 from pydantic import BaseModel , Field
+from jwt import encode, decode, exceptions
+from flask_login import UserMixin
    
 
 
@@ -59,3 +61,42 @@ class Notication(BaseModel):
     user_id: str = Field()
     title: str = Field()
     message: str = Field()
+
+@login_manager.user_loader
+def load_user(user_id):
+    user = user_db.find_one({"_id":ObjectId(user_id)})
+    return MyUser(user)
+
+
+class MyUser(UserMixin):
+    def __init__(self, user_json):
+        super().__init__()
+        self.user_json = user_json
+
+    def get_id(self):
+        object_id = self.user_json.get('_id')
+        return str(object_id)
+    
+    def get_reset_token(self, expires_min=10):
+        now = datetime.now(timezone.utc)
+        token = encode({'user_id':str(self.get_id()), 'exp':datetime.timestamp(now + timedelta(minutes=expires_min))},app.config["SECRET_KEY"],"HS256")
+        print(token)
+        print(f"decoded token: {decode(token,app.config['SECRET_KEY'],'HS256')}")
+        return token
+
+    @staticmethod
+    def verify_reset_token(token):
+        now = datetime.timestamp(datetime.now(timezone.utc))
+        decoded = decode(token,app.config['SECRET_KEY'],'HS256')
+        print(decoded)
+        try:
+            user_id = decoded['user_id']
+            if now > decoded['exp']:
+                return None
+        except BaseException:
+            return None
+        return user_id
+
+    def __repr__(self):
+        return f"User('{self.user_json['username']}', '{self.user_json['email']}, '{self.user_json['prof_pic']}'')"
+    

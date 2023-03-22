@@ -2,4 +2,4 @@
 menv
 .dist
 instance
-__pycache__
+*__pycache__

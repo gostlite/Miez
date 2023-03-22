@@ -27,7 +27,15 @@ client = PyMongo(app)
 user_db = client.db.users
 user_bk = client.db.bookings
 user_not = client.db.notifications
-from miez_app import route
+from miez_app.errors.handlers import errors
+from miez_app.users.route import users
+from miez_app.main.route import main
+from miez_app.posts.route import post
+app.register_blueprint(errors)
+app.register_blueprint(users)
+app.register_blueprint(main)
+app.register_blueprint(post)
+# from miez_app import route
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 

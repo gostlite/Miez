@@ -31,7 +31,7 @@
                   <form
                     role="form"
                     class="text-start"
-                    action="{{ url_for('login') }}"
+                    action="{{ url_for('users.login') }}"
                     method="post"
                   >
                     {{ form.hidden_tag() }}
@@ -72,14 +72,14 @@
                       mb-2') }}
                       <!-- <button type="button" class="btn bg-gradient-primary w-100 my-4 mb-2">Sign in</button> -->
                     </div>
-                    <a href="{{ url_for('reset_request') }}"
+                    <a href="{{ url_for('users.reset_request') }}"
                       ><small class="text-muted">forgot password?</small></a
                     >
 
                     <p class="mt-4 text-sm text-center">
                       Don't have an account?
                       <a
-                        href="{{ url_for('register') }}"
+                        href="{{ url_for('users.register') }}"
                         class="text-primary text-gradient font-weight-bold"
                         >Sign up</a
                       >
