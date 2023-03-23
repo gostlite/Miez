@@ -3,3 +3,4 @@ menv
 .dist
 instance
 *__pycache__
+.vercel
